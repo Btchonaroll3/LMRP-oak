@@ -59,6 +59,8 @@
         var markersLayer = L.layerGroup().addTo(map);
 
         map.on('click', function(e) {
+            // Prevent the default scroll behavior when clicking on the map
+            e.preventDefault();
             var latlng = e.latlng;
             // Place a marker when the map is clicked
             var marker = L.circleMarker(latlng, {
@@ -70,6 +72,11 @@
 
             // Add a popup with coordinates
             marker.bindPopup("Marker placed at: " + latlng.lat.toFixed(2) + ", " + latlng.lng.toFixed(2)).openPopup();
+        });
+
+        // Prevent the map from scrolling when zoomed in
+        map.on('wheel', function(e) {
+            e.preventDefault();
         });
     </script>
 </body>
