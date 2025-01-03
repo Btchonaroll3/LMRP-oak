@@ -159,19 +159,19 @@ zoomOutButton.addEventListener('click', function() {
 imageContainer.addEventListener('click', function(event) {
     if (!currentImage) return; // Ensure the image is loaded
 
-    const x = event.offsetX;
-    const y = event.offsetY;
+    const x = event.clientX - imageContainer.getBoundingClientRect().left + imageContainer.scrollLeft;
+    const y = event.clientY - imageContainer.getBoundingClientRect().top + imageContainer.scrollTop;
 
     // Adjust the coordinates based on the current zoom scale
-    const adjustedX = x / scale;
-    const adjustedY = y / scale;
+    const adjustedX = (x - imageContainer.offsetLeft) / scale;
+    const adjustedY = (y - imageContainer.offsetTop) / scale;
 
     const point = document.createElement('div');
     point.classList.add('point');
     point.style.left = `${adjustedX - 7}px`; // Center the point
     point.style.top = `${adjustedY - 7}px`;
 
-    point.setAttribute('title', `Point at (${adjustedX}, ${adjustedY})`);
+    point.setAttribute('title', `Point at (${adjustedX.toFixed(2)}, ${adjustedY.toFixed(2)})`);
     imageContainer.appendChild(point);
 
     // Show the tooltip on hover
