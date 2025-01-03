@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Image with Zoom, Scroll, Points, and Local Image</title>
+    <title>Interactive Image with Zoom, Scroll, and Points</title>
     <style>
         body {
             margin: 0;
@@ -67,21 +67,6 @@
             cursor: pointer;
         }
 
-        /* Image URL input (if needed, but not used in this case) */
-        .url-input {
-            position: fixed;
-            top: 70px;
-            left: 20px;
-            z-index: 20;
-            background-color: rgba(255, 255, 255, 0.7);
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .url-input input {
-            width: 300px;
-            padding: 5px;
-        }
     </style>
 </head>
 <body>
@@ -109,7 +94,10 @@ const zoomStep = 0.1; // Zoom increment
 // Image URL (local path to your map image)
 const imageUrl = "images/housing.jpg";  // The relative path to your image
 
-// Function to load the image from URL (in this case, it's hardcoded)
+// Store points relative to the original image size
+let points = [];
+
+// Function to load the image from URL
 function loadImage() {
     if (imageUrl) {
         // Clear previous image if any
@@ -141,6 +129,7 @@ function setZoom() {
     if (currentImage) {
         currentImage.style.transform = `scale(${scale})`;
     }
+    redrawPoints();
 }
 
 // Zoom In button functionality
@@ -159,35 +148,57 @@ zoomOutButton.addEventListener('click', function() {
 imageContainer.addEventListener('click', function(event) {
     if (!currentImage) return; // Ensure the image is loaded
 
-    const x = event.clientX - imageContainer.getBoundingClientRect().left + imageContainer.scrollLeft;
-    const y = event.clientY - imageContainer.getBoundingClientRect().top + imageContainer.scrollTop;
+    // Get the image's position relative to the container
+    const containerRect = imageContainer.getBoundingClientRect();
+    const x = event.clientX - containerRect.left;
+    const y = event.clientY - containerRect.top;
 
-    // Adjust the coordinates based on the current zoom scale
-    const adjustedX = (x - imageContainer.offsetLeft) / scale;
-    const adjustedY = (y - imageContainer.offsetTop) / scale;
+    // Save the point in the original image coordinates
+    const point = {
+        x: (x / scale),  // Convert click position to original image coordinates
+        y: (y / scale)   // Convert click position to original image coordinates
+    };
 
-    const point = document.createElement('div');
-    point.classList.add('point');
-    point.style.left = `${adjustedX - 7}px`; // Center the point
-    point.style.top = `${adjustedY - 7}px`;
+    points.push(point);
+    redrawPoints();
+});
 
-    point.setAttribute('title', `Point at (${adjustedX.toFixed(2)}, ${adjustedY.toFixed(2)})`);
-    imageContainer.appendChild(point);
+// Function to redraw points on the image
+function redrawPoints() {
+    // Clear previous points
+    const existingPoints = document.querySelectorAll('.point');
+    existingPoints.forEach(point => point.remove());
 
-    // Show the tooltip on hover
-    point.addEventListener('mouseenter', function() {
-        const tooltip = document.createElement('div');
-        tooltip.classList.add('tooltip');
-        tooltip.style.left = `${adjustedX + 10}px`;
-        tooltip.style.top = `${adjustedY + 10}px`;
-        tooltip.innerText = `Point at (${adjustedX.toFixed(2)}, ${adjustedY.toFixed(2)})`;
-        imageContainer.appendChild(tooltip);
+    // Re-add points
+    points.forEach(point => {
+        const pointDiv = document.createElement('div');
+        pointDiv.classList.add('point');
 
-        point.addEventListener('mouseleave', function() {
-            tooltip.remove();
+        // Adjust position based on current zoom
+        const adjustedX = point.x * scale;
+        const adjustedY = point.y * scale;
+
+        pointDiv.style.left = `${adjustedX - 7}px`;  // Center the point
+        pointDiv.style.top = `${adjustedY - 7}px`;  // Center the point
+
+        pointDiv.setAttribute('title', `Point at (${point.x.toFixed(2)}, ${point.y.toFixed(2)})`);
+        imageContainer.appendChild(pointDiv);
+
+        // Show the tooltip on hover
+        pointDiv.addEventListener('mouseenter', function() {
+            const tooltip = document.createElement('div');
+            tooltip.classList.add('tooltip');
+            tooltip.style.left = `${adjustedX + 10}px`;
+            tooltip.style.top = `${adjustedY + 10}px`;
+            tooltip.innerText = `Point at (${point.x.toFixed(2)}, ${point.y.toFixed(2)})`;
+            imageContainer.appendChild(tooltip);
+
+            pointDiv.addEventListener('mouseleave', function() {
+                tooltip.remove();
+            });
         });
     });
-});
+}
 
 // Load the image initially when the page loads
 window.onload = loadImage;
