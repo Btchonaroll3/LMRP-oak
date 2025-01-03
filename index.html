@@ -111,9 +111,10 @@
         mapContainer.addEventListener('click', (e) => {
             if (!addingPoint) return;  // If not in "adding point" mode, do nothing
 
+            // Calculate the correct position of the click relative to the map image
             const mapRect = mapImage.getBoundingClientRect();
-            const x = e.clientX - mapRect.left + mapContainer.scrollLeft;  // Account for horizontal scrolling
-            const y = e.clientY - mapRect.top + mapContainer.scrollTop;    // Account for vertical scrolling
+            const x = e.clientX - mapRect.left + mapContainer.scrollLeft;  // Account for horizontal scroll
+            const y = e.clientY - mapRect.top + mapContainer.scrollTop;    // Account for vertical scroll
 
             // Add the point to the map at the clicked location
             const point = {
@@ -127,7 +128,7 @@
             // Create a point on the image
             const pointElement = document.createElement('div');
             pointElement.classList.add('point');
-            pointElement.style.top = `${y - 5}px`;  // Offset by half width/height
+            pointElement.style.top = `${y - 5}px`;  // Offset by half width/height of the point
             pointElement.style.left = `${x - 5}px`;
             pointElement.addEventListener('click', () => showPointInfo(point));
             mapContainer.appendChild(pointElement);
