@@ -23,11 +23,39 @@
             width: 100%;
             height: 100%;
         }
+
+        /* Custom zoom buttons */
+        .zoom-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .zoom-buttons button {
+            display: block;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .zoom-buttons button:hover {
+            background-color: #f1f1f1;
+        }
     </style>
 </head>
 <body>
     <!-- Map container where the map will appear -->
     <div id="map" class="map-container"></div>
+
+    <!-- Custom zoom buttons -->
+    <div class="zoom-buttons">
+        <button id="zoomInBtn">Zoom In</button>
+        <button id="zoomOutBtn">Zoom Out</button>
+    </div>
 
     <!-- jQuery (Optional, for additional functionality) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -40,7 +68,7 @@
         // Initialize the map with Leaflet
         var map = L.map('map', {
             center: [2972, 4037],  // Start at the center of the image (half the size of your image)
-            zoom: 2,  // Set the initial zoom level
+            zoom: 1,  // Set the initial zoom level (adjusted to make sure it's not fully zoomed in)
             minZoom: 1,  // Minimum zoom level
             maxZoom: 5,  // Maximum zoom level
             crs: L.CRS.Simple  // Use a simple coordinate reference system for image maps
@@ -79,10 +107,14 @@
             e.preventDefault();
         });
 
-        // Leaflet's default zoom controls (top left corner)
-        L.control.zoom({
-            position: 'topright'  // Position it to the top-right (default is top-left)
-        }).addTo(map);
+        // Custom zoom button functionality
+        document.getElementById('zoomInBtn').addEventListener('click', function() {
+            map.zoomIn();
+        });
+
+        document.getElementById('zoomOutBtn').addEventListener('click', function() {
+            map.zoomOut();
+        });
     </script>
 </body>
 </html>
