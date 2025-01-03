@@ -81,7 +81,10 @@
         var imageBounds = [[0, 0], [5944, 8075]];  // Image size: height x width
 
         // Add the image as an overlay
-        L.imageOverlay(imageUrl, imageBounds).addTo(map);
+        var overlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+
+        // Adjust map zoom to fit the image properly
+        map.fitBounds(imageBounds);
 
         // Allow users to place markers on the map
         var markersLayer = L.layerGroup().addTo(map);
