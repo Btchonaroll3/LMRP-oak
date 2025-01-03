@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zoomable Map with Points</title>
+    <title>Scrollable Map with Points</title>
     <style>
         body, html {
             margin: 0;
@@ -69,24 +69,12 @@
 <script>
     const imageContainer = document.getElementById('image-container');
     const popup = document.getElementById('popup');
-    let scale = 1.5;  // Initial zoom set to 50%
+    let scale = 1.5;  // Initial zoom set to 150%
     let offsetX = 0;
     let offsetY = 0;
     let points = [];
 
-    // To allow zoom and scroll
-    imageContainer.addEventListener('wheel', (event) => {
-        event.preventDefault();
-        if (event.deltaY < 0) {
-            scale = Math.min(scale * 1.1, 3);  // Zoom in (limit to 3x)
-        } else {
-            scale = Math.max(scale * 0.9, 1);  // Zoom out (limit to 1x)
-        }
-
-        updateImage();
-        updatePoints();
-    });
-
+    // Enable scrolling to pan the image
     imageContainer.addEventListener('mousedown', (event) => {
         event.preventDefault();
         const startX = event.clientX;
@@ -152,9 +140,10 @@
 
     function updateImage() {
         imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        updatePoints();
     }
 
-    // Update the position of points based on the current scale
+    // Update the position of points based on the current scale and position
     function updatePoints() {
         const pointElements = document.querySelectorAll('.point');
         const labelElements = document.querySelectorAll('.label');
