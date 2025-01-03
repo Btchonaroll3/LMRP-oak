@@ -78,6 +78,11 @@
         map.on('wheel', function(e) {
             e.preventDefault();
         });
+
+        // Leaflet's default zoom controls (top left corner)
+        L.control.zoom({
+            position: 'topright'  // Position it to the top-right (default is top-left)
+        }).addTo(map);
     </script>
 </body>
 </html>
