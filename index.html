@@ -7,7 +7,6 @@
     <style>
         body {
             display: flex;
-            flex-direction: row;
             margin: 0;
             height: 100vh;
             overflow: hidden;
@@ -18,12 +17,11 @@
             width: 80%;
             height: 100%;
             overflow: scroll;
+            background-color: #f0f0f0; /* Background to show scrollable area */
         }
 
         #map-image {
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: relative;
             width: 100%;
             height: auto;
         }
@@ -98,8 +96,8 @@
         // Event listener to handle point clicks and selecting points
         mapContainer.addEventListener('click', (e) => {
             const mapRect = mapImage.getBoundingClientRect();
-            const x = e.clientX - mapRect.left;
-            const y = e.clientY - mapRect.top;
+            const x = e.clientX - mapRect.left + mapContainer.scrollLeft;  // Account for horizontal scrolling
+            const y = e.clientY - mapRect.top + mapContainer.scrollTop;    // Account for vertical scrolling
 
             // Add the point to the map at the clicked location
             const point = {
