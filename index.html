@@ -3,158 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Points with Zoom</title>
+    <title>Interactive Image with Zoom, Scroll, Points, and URL</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-color: #f4f4f4;
+            padding: 0;
+            overflow: hidden;
         }
 
-        .container {
+        /* Container for the image and points */
+        .image-container {
             position: relative;
-            overflow: hidden;
-            max-width: 100%;
-            max-height: 100vh;
+            width: 100%;
+            height: 100vh;  /* Make the container take full viewport height */
+            overflow: auto; /* Enable scrolling */
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        img {
-            max-width: 100%;
-            height: auto;
+        /* Image style */
+        .image-container img {
             transition: transform 0.3s ease;
             cursor: pointer;
         }
 
+        /* Points style */
         .point {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: red;
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
+            background-color: red;
             cursor: pointer;
+            z-index: 10;
         }
 
-        .description {
+        /* Tooltip style */
+        .tooltip {
             position: absolute;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
             display: none;
-            font-size: 14px;
         }
 
-        .point:hover + .description {
-            display: block;
-        }
-
-        /* Zoom In/Out Controls */
+        /* Zoom controls */
         .zoom-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 20;
+            background-color: rgba(255, 255, 255, 0.7);
             padding: 10px;
             border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
-        .zoom-btn {
-            background-color: #fff;
-            border: none;
-            padding: 5px 10px;
-            margin: 5px;
+        .zoom-button {
+            font-size: 20px;
+            padding: 10px;
             cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s;
         }
 
-        .zoom-btn:hover {
-            background-color: #ccc;
+        /* Image URL input */
+        .url-input {
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            z-index: 20;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .url-input input {
+            width: 300px;
+            padding: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Image -->
-        <img src="images/housing.jpg" alt="Your Image" id="image">
 
-        <!-- Zoom Controls -->
-        <div class="zoom-controls">
-            <button class="zoom-btn" id="zoom-in">Zoom In</button>
-            <button class="zoom-btn" id="zoom-out">Zoom Out</button>
-        </div>
+<!-- Input for the image URL -->
+<div class="url-input">
+    <input type="text" id="imageUrl" placeholder="Enter image URL" />
+    <button onclick="loadImage()">Load Image</button>
+</div>
 
-        <!-- Points -->
-        <div class="point" style="top: 50px; left: 100px;"></div>
-        <div class="description" style="top: 50px; left: 110px;">Description for Point 1</div>
+<!-- Zoom controls -->
+<div class="zoom-controls">
+    <button class="zoom-button" id="zoomIn">+</button>
+    <button class="zoom-button" id="zoomOut">-</button>
+</div>
 
-        <div class="point" style="top: 150px; left: 200px;"></div>
-        <div class="description" style="top: 150px; left: 210px;">Description for Point 2</div>
+<!-- Image container for interactive points -->
+<div class="image-container" id="imageContainer">
+    <!-- Image will be loaded dynamically here -->
+</div>
 
-        <!-- Add more points as needed -->
-    </div>
+<script>
+// Get the image container and other elements
+const imageContainer = document.getElementById('imageContainer');
+const zoomInButton = document.getElementById('zoomIn');
+const zoomOutButton = document.getElementById('zoomOut');
+const imageUrlInput = document.getElementById('imageUrl');
+let currentImage = null; // To store the image element
+let scale = 1; // Initial zoom level
+const zoomStep = 0.1; // Zoom increment
 
-    <script>
-        // JavaScript for adding more points dynamically
-        document.addEventListener('click', function (e) {
-            if (e.target.tagName === 'IMG') {
-                const rect = e.target.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+// Function to load the image from URL input
+function loadImage() {
+    const imageUrl = imageUrlInput.value.trim();
+    if (imageUrl) {
+        // Clear previous image if any
+        if (currentImage) {
+            imageContainer.innerHTML = '';
+        }
 
-                const point = document.createElement('div');
-                point.classList.add('point');
-                point.style.top = `${y - 5}px`;
-                point.style.left = `${x - 5}px`;
+        // Create a new image element
+        currentImage = new Image();
+        currentImage.src = imageUrl;
+        currentImage.alt = "Interactive Image";
+        currentImage.style.maxWidth = "100%";  // Allow image to scale based on container
+        currentImage.style.transition = "transform 0.3s ease";
+        currentImage.style.cursor = "pointer";
 
-                const description = document.createElement('div');
-                description.classList.add('description');
-                description.style.top = `${y + 10}px`;
-                description.style.left = `${x + 10}px`;
-                description.innerText = 'New point description'; // Change as needed
+        // Append the image to the container
+        imageContainer.appendChild(currentImage);
 
-                e.target.parentNode.appendChild(point);
-                e.target.parentNode.appendChild(description);
-            }
+        // Reset zoom to default
+        scale = 1;
+        setZoom();
+    } else {
+        alert("Please enter a valid image URL.");
+    }
+}
+
+// Function to update zoom level
+function setZoom() {
+    if (currentImage) {
+        currentImage.style.transform = `scale(${scale})`;
+    }
+}
+
+// Zoom In button functionality
+zoomInButton.addEventListener('click', function() {
+    scale += zoomStep;
+    setZoom();
+});
+
+// Zoom Out button functionality
+zoomOutButton.addEventListener('click', function() {
+    scale = Math.max(0.1, scale - zoomStep); // Prevent zooming out too much
+    setZoom();
+});
+
+// Function to add points to the image
+imageContainer.addEventListener('click', function(event) {
+    if (!currentImage) return; // Ensure the image is loaded
+
+    const x = event.offsetX;
+    const y = event.offsetY;
+
+    const point = document.createElement('div');
+    point.classList.add('point');
+    point.style.left = `${x - 7}px`; // Center the point
+    point.style.top = `${y - 7}px`;
+
+    point.setAttribute('title', `Point at (${x}, ${y})`);
+    imageContainer.appendChild(point);
+
+    // Show the tooltip on hover
+    point.addEventListener('mouseenter', function() {
+        const tooltip = document.createElement('div');
+        tooltip.classList.add('tooltip');
+        tooltip.style.left = `${x + 10}px`;
+        tooltip.style.top = `${y + 10}px`;
+        tooltip.innerText = `Point at (${x}, ${y})`;
+        imageContainer.appendChild(tooltip);
+
+        point.addEventListener('mouseleave', function() {
+            tooltip.remove();
         });
+    });
+});
+</script>
 
-        // Zoom In and Zoom Out functionality
-        const image = document.getElementById('image');
-        let zoomLevel = 1; // Default zoom level
-
-        // Zoom In
-        document.getElementById('zoom-in').addEventListener('click', function () {
-            zoomLevel += 0.1;
-            image.style.transform = `scale(${zoomLevel})`;
-        });
-
-        // Zoom Out
-        document.getElementById('zoom-out').addEventListener('click', function () {
-            zoomLevel = Math.max(1, zoomLevel - 0.1); // Prevent zooming out beyond the original size
-            image.style.transform = `scale(${zoomLevel})`;
-        });
-
-        // Optional: Implement zoom via mouse scroll
-        image.addEventListener('wheel', function (e) {
-            e.preventDefault();
-            if (e.deltaY < 0) {
-                zoomLevel += 0.1;
-            } else {
-                zoomLevel = Math.max(1, zoomLevel - 0.1);
-            }
-            image.style.transform = `scale(${zoomLevel})`;
-        });
-    </script>
 </body>
 </html>
