@@ -3,212 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Image with Zoom, Scroll, and Points</title>
+    <title>Zoomable Map with Points</title>
     <style>
-        body {
+        body, html {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            height: 100%;
         }
 
-        /* Container for the image and points */
-        .image-container {
-            position: relative;
+        #container {
             width: 100%;
-            height: 100vh;  /* Make the container take full viewport height */
-            overflow: auto; /* Enable scrolling */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background-color: #f0f0f0;
         }
 
-        /* Image style */
-        .image-container img {
-            transition: transform 0.3s ease;
+        #image-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background-image: url('images/housing.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             cursor: pointer;
         }
 
-        /* Points style */
         .point {
             position: absolute;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
+            width: 20px;
+            height: 20px;
             background-color: red;
+            border-radius: 50%;
             cursor: pointer;
-            z-index: 10;
         }
 
-        /* Tooltip style */
-        .tooltip {
+        .label {
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 5px;
-            border-radius: 5px;
-            font-size: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 5px;
+            font-size: 14px;
             display: none;
         }
 
-        /* Zoom controls */
-        .zoom-controls {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 20;
-            background-color: rgba(255, 255, 255, 0.7);
+        .popup {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
             padding: 10px;
-            border-radius: 5px;
+            display: none;
+            z-index: 999;
         }
-
-        .zoom-button {
-            font-size: 20px;
-            padding: 10px;
-            cursor: pointer;
-        }
-
     </style>
 </head>
 <body>
 
-<!-- Zoom controls -->
-<div class="zoom-controls">
-    <button class="zoom-button" id="zoomIn">+</button>
-    <button class="zoom-button" id="zoomOut">-</button>
-</div>
-
-<!-- Image container for interactive points -->
-<div class="image-container" id="imageContainer">
-    <!-- Image will be loaded dynamically here -->
+<div id="container">
+    <div id="image-container"></div>
+    <div class="popup" id="popup"></div>
 </div>
 
 <script>
-// Get the image container and other elements
-const imageContainer = document.getElementById('imageContainer');
-const zoomInButton = document.getElementById('zoomIn');
-const zoomOutButton = document.getElementById('zoomOut');
-let currentImage = null; // To store the image element
-let scale = 1; // Initial zoom level
-const zoomStep = 0.1; // Zoom increment
+    const imageContainer = document.getElementById('image-container');
+    const popup = document.getElementById('popup');
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+    let points = [];
 
-// Image URL (local path to your map image)
-const imageUrl = "images/housing.jpg";  // The relative path to your image
-
-// Store points as original image coordinates (before zoom)
-let points = [];
-let originalImageWidth, originalImageHeight;
-
-// Function to load the image from URL
-function loadImage() {
-    if (imageUrl) {
-        // Clear previous image if any
-        if (currentImage) {
-            imageContainer.innerHTML = '';
+    // To allow zoom and scroll
+    imageContainer.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        if (event.deltaY < 0) {
+            scale = Math.min(scale * 1.1, 3);  // Zoom in (limit to 3x)
+        } else {
+            scale = Math.max(scale * 0.9, 1);  // Zoom out (limit to 1x)
         }
 
-        // Create a new image element
-        currentImage = new Image();
-        currentImage.src = imageUrl;
-        currentImage.alt = "Interactive Image";
-        currentImage.style.maxWidth = "100%";  // Allow image to scale based on container
-        currentImage.style.transition = "transform 0.3s ease";
-        currentImage.style.cursor = "pointer";
-
-        // Wait for the image to load and get its original size
-        currentImage.onload = () => {
-            originalImageWidth = currentImage.width;
-            originalImageHeight = currentImage.height;
-
-            // Reset zoom to default (fully zoomed out)
-            scale = 1;
-            setZoom();
-        };
-
-        // Append the image to the container
-        imageContainer.appendChild(currentImage);
-    } else {
-        alert("Please enter a valid image URL.");
-    }
-}
-
-// Function to update zoom level
-function setZoom() {
-    if (currentImage) {
-        currentImage.style.transform = `scale(${scale})`;
-    }
-    redrawPoints();
-}
-
-// Zoom In button functionality
-zoomInButton.addEventListener('click', function() {
-    scale += zoomStep;
-    setZoom();
-});
-
-// Zoom Out button functionality
-zoomOutButton.addEventListener('click', function() {
-    scale = Math.max(0.1, scale - zoomStep); // Prevent zooming out too much
-    setZoom();
-});
-
-// Function to add points to the image
-imageContainer.addEventListener('click', function(event) {
-    if (!currentImage) return; // Ensure the image is loaded
-
-    // Get the image's position relative to the container
-    const containerRect = imageContainer.getBoundingClientRect();
-    const x = event.clientX - containerRect.left;
-    const y = event.clientY - containerRect.top;
-
-    // Save the point in the original image coordinates (before zoom)
-    const point = {
-        x: x / scale,  // Store the point in the original coordinates
-        y: y / scale   // Store the point in the original coordinates
-    };
-
-    points.push(point);
-    redrawPoints();
-});
-
-// Function to redraw points on the image
-function redrawPoints() {
-    // Clear previous points
-    const existingPoints = document.querySelectorAll('.point');
-    existingPoints.forEach(point => point.remove());
-
-    // Re-add points
-    points.forEach(point => {
-        const pointDiv = document.createElement('div');
-        pointDiv.classList.add('point');
-
-        // Adjust position based on current zoom level
-        const adjustedX = point.x * scale;
-        const adjustedY = point.y * scale;
-
-        pointDiv.style.left = `${adjustedX - 7}px`;  // Center the point
-        pointDiv.style.top = `${adjustedY - 7}px`;  // Center the point
-
-        pointDiv.setAttribute('title', `Point at (${point.x.toFixed(2)}, ${point.y.toFixed(2)})`);
-        imageContainer.appendChild(pointDiv);
-
-        // Show the tooltip on hover
-        pointDiv.addEventListener('mouseenter', function() {
-            const tooltip = document.createElement('div');
-            tooltip.classList.add('tooltip');
-            tooltip.style.left = `${adjustedX + 10}px`;
-            tooltip.style.top = `${adjustedY + 10}px`;
-            tooltip.innerText = `Point at (${point.x.toFixed(2)}, ${point.y.toFixed(2)})`;
-            imageContainer.appendChild(tooltip);
-
-            pointDiv.addEventListener('mouseleave', function() {
-                tooltip.remove();
-            });
-        });
+        updateImage();
     });
-}
 
-// Load the image initially when the page loads
-window.onload = loadImage;
+    imageContainer.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const startOffsetX = offsetX;
+        const startOffsetY = offsetY;
+
+        function onMouseMove(moveEvent) {
+            offsetX = startOffsetX + moveEvent.clientX - startX;
+            offsetY = startOffsetY + moveEvent.clientY - startY;
+            updateImage();
+        }
+
+        function onMouseUp() {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        }
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    });
+
+    imageContainer.addEventListener('click', (event) => {
+        const mouseX = (event.clientX - offsetX) / scale;
+        const mouseY = (event.clientY - offsetY) / scale;
+        const point = { x: mouseX, y: mouseY, label: '', imageUrl: '' };
+
+        // Prompt for label and image URL
+        const label = prompt('Enter label for this point:');
+        if (label) point.label = label;
+        const imageUrl = prompt('Enter image URL (optional):');
+        if (imageUrl) point.imageUrl = imageUrl;
+
+        points.push(point);
+        createPoint(point);
+    });
+
+    function createPoint(point) {
+        const pointElement = document.createElement('div');
+        pointElement.classList.add('point');
+        pointElement.style.left = `${point.x * scale + offsetX - 10}px`;
+        pointElement.style.top = `${point.y * scale + offsetY - 10}px`;
+
+        const labelElement = document.createElement('div');
+        labelElement.classList.add('label');
+        labelElement.innerText = point.label;
+        labelElement.style.left = `${point.x * scale + offsetX + 15}px`;
+        labelElement.style.top = `${point.y * scale + offsetY - 10}px`;
+
+        pointElement.addEventListener('click', () => {
+            if (point.imageUrl) {
+                popup.innerHTML = `<img src="${point.imageUrl}" alt="Image" style="width: 200px; height: 200px;">`;
+            }
+            popup.innerHTML += `<p>${point.label}</p>`;
+            popup.style.left = `${point.x * scale + offsetX + 20}px`;
+            popup.style.top = `${point.y * scale + offsetY + 20}px`;
+            popup.style.display = 'block';
+        });
+
+        imageContainer.appendChild(pointElement);
+        imageContainer.appendChild(labelElement);
+    }
+
+    function updateImage() {
+        imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    }
 </script>
 
 </body>
