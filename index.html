@@ -68,7 +68,7 @@
         // Initialize the map with Leaflet
         var map = L.map('map', {
             center: [1472, 2000],  // Start at the center of the image (half the size of your image)
-            zoom: 0,  // Start with zoom level 0 (fully zoomed out to show the full image)
+            zoom: 0,  // Start with zoom level 0 to show the full image
             minZoom: 0,  // Minimum zoom level
             maxZoom: 5,  // Maximum zoom level
             crs: L.CRS.Simple  // Use a simple coordinate reference system for image maps
@@ -85,9 +85,6 @@
 
         // Use fitBounds to ensure the entire image is visible on initial load
         map.fitBounds(imageBounds);  // Automatically adjusts zoom level to fit the image within the map
-
-        // Manually set zoom level to 0 to fully zoom out
-        map.setZoom(0);  // Ensures the image is fully zoomed out and visible in the viewport
 
         // Allow users to place markers on the map
         var markersLayer = L.layerGroup().addTo(map);
