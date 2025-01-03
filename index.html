@@ -24,7 +24,7 @@
             height: 100%;
             position: absolute;
             background-image: url('images/housing.jpg');
-            background-size: contain;
+            background-size: auto;
             background-repeat: no-repeat;
             background-position: center;
             cursor: pointer;
@@ -69,13 +69,12 @@
 <script>
     const imageContainer = document.getElementById('image-container');
     const popup = document.getElementById('popup');
-    let scale = 1.5;  // Initial zoom set to 150%
     let offsetX = 0;
     let offsetY = 0;
     let points = [];
 
-    // Set up the image so it starts centered and zoomed at 150%
-    imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    // Set up the image so it starts centered without zoom
+    imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
 
     // Enable scrolling to pan the image
     imageContainer.addEventListener('mousedown', (event) => {
@@ -101,8 +100,8 @@
     });
 
     imageContainer.addEventListener('click', (event) => {
-        const mouseX = (event.clientX - offsetX) / scale;
-        const mouseY = (event.clientY - offsetY) / scale;
+        const mouseX = (event.clientX - offsetX);
+        const mouseY = (event.clientY - offsetY);
         const point = { x: mouseX, y: mouseY, label: '', imageUrl: '' };
 
         // Prompt for label and image URL
@@ -118,22 +117,22 @@
     function createPoint(point) {
         const pointElement = document.createElement('div');
         pointElement.classList.add('point');
-        pointElement.style.left = `${point.x * scale + offsetX - 10}px`;
-        pointElement.style.top = `${point.y * scale + offsetY - 10}px`;
+        pointElement.style.left = `${point.x + offsetX - 10}px`;
+        pointElement.style.top = `${point.y + offsetY - 10}px`;
 
         const labelElement = document.createElement('div');
         labelElement.classList.add('label');
         labelElement.innerText = point.label;
-        labelElement.style.left = `${point.x * scale + offsetX + 15}px`;
-        labelElement.style.top = `${point.y * scale + offsetY - 10}px`;
+        labelElement.style.left = `${point.x + offsetX + 15}px`;
+        labelElement.style.top = `${point.y + offsetY - 10}px`;
 
         pointElement.addEventListener('click', () => {
             if (point.imageUrl) {
                 popup.innerHTML = `<img src="${point.imageUrl}" alt="Image" style="width: 200px; height: 200px;">`;
             }
             popup.innerHTML += `<p>${point.label}</p>`;
-            popup.style.left = `${point.x * scale + offsetX + 20}px`;
-            popup.style.top = `${point.y * scale + offsetY + 20}px`;
+            popup.style.left = `${point.x + offsetX + 20}px`;
+            popup.style.top = `${point.y + offsetY + 20}px`;
             popup.style.display = 'block';
         });
 
@@ -142,21 +141,21 @@
     }
 
     function updateImage() {
-        imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
         updatePoints();
     }
 
-    // Update the position of points based on the current scale and position
+    // Update the position of points based on the current position
     function updatePoints() {
         const pointElements = document.querySelectorAll('.point');
         const labelElements = document.querySelectorAll('.label');
         points.forEach((point, index) => {
             const pointElement = pointElements[index];
             const labelElement = labelElements[index];
-            pointElement.style.left = `${point.x * scale + offsetX - 10}px`;
-            pointElement.style.top = `${point.y * scale + offsetY - 10}px`;
-            labelElement.style.left = `${point.x * scale + offsetX + 15}px`;
-            labelElement.style.top = `${point.y * scale + offsetY - 10}px`;
+            pointElement.style.left = `${point.x + offsetX - 10}px`;
+            pointElement.style.top = `${point.y + offsetY - 10}px`;
+            labelElement.style.left = `${point.x + offsetX + 15}px`;
+            labelElement.style.top = `${point.y + offsetY - 10}px`;
         });
     }
 
