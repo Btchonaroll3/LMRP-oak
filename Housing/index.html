@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Points with Zoom</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            position: relative;
+            overflow: hidden;
+            max-width: 100%;
+            max-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .point {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .description {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .point:hover + .description {
+            display: block;
+        }
+
+        /* Zoom In/Out Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .zoom-btn {
+            background-color: #fff;
+            border: none;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .zoom-btn:hover {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Image -->
+        <img src="YOUR_IMAGE_URL_HERE" alt="Your Image" id="image">
+
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button class="zoom-btn" id="zoom-in">Zoom In</button>
+            <button class="zoom-btn" id="zoom-out">Zoom Out</button>
+        </div>
+
+        <!-- Points -->
+        <div class="point" style="top: 50px; left: 100px;"></div>
+        <div class="description" style="top: 50px; left: 110px;">Description for Point 1</div>
+
+        <div class="point" style="top: 150px; left: 200px;"></div>
+        <div class="description" style="top: 150px; left: 210px;">Description for Point 2</div>
+
+        <!-- Add more points as needed -->
+    </div>
+
+    <script>
+        // JavaScript for adding more points dynamically
+        document.addEventListener('click', function (e) {
+            if (e.target.tagName === 'IMG') {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const point = document.createElement('div');
+                point.classList.add('point');
+                point.style.top = `${y - 5}px`;
+                point.style.left = `${x - 5}px`;
+
+                const description = document.createElement('div');
+                description.classList.add('description');
+                description.style.top = `${y + 10}px`;
+                description.style.left = `${x + 10}px`;
+                description.innerText = 'New point description'; // Change as needed
+
+                e.target.parentNode.appendChild(point);
+                e.target.parentNode.appendChild(description);
+            }
+        });
+
+        // Zoom In and Zoom Out functionality
+        const image = document.getElementById('image');
+        let zoomLevel = 1; // Default zoom level
+
+        // Zoom In
+        document.getElementById('zoom-in').addEventListener('click', function () {
+            zoomLevel += 0.1;
+            image.style.transform = `scale(${zoomLevel})`;
+        });
+
+        // Zoom Out
+        document.getElementById('zoom-out').addEventListener('click', function () {
+            zoomLevel = Math.max(1, zoomLevel - 0.1); // Prevent zooming out beyond the original size
+            image.style.transform = `scale(${zoomLevel})`;
+        });
+
+        // Optional: Implement zoom via mouse scroll
+        image.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomLevel += 0.1;
+            } else {
+                zoomLevel = Math.max(1, zoomLevel - 0.1);
+            }
+            image.style.transform = `scale(${zoomLevel})`;
+        });
+    </script>
+</body>
+</html>
