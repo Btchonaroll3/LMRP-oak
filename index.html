@@ -97,7 +97,6 @@
 
     <script>
         let points = [];
-        let selectedPoint = null;
         let addingPoint = false;  // Flag to control when we are adding a point
 
         const mapContainer = document.getElementById('map-container');
@@ -111,8 +110,10 @@
         mapContainer.addEventListener('click', (e) => {
             if (!addingPoint) return;  // If not in "adding point" mode, do nothing
 
-            // Calculate the correct position of the click relative to the map image
+            // Get the bounding rectangle of the map image
             const mapRect = mapImage.getBoundingClientRect();
+            
+            // Calculate the position on the map image considering the scroll
             const x = e.clientX - mapRect.left + mapContainer.scrollLeft;  // Account for horizontal scroll
             const y = e.clientY - mapRect.top + mapContainer.scrollTop;    // Account for vertical scroll
 
