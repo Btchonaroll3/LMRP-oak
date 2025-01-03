@@ -71,7 +71,13 @@
             zoom: 0,  // Start with zoom level 0 to show the full image
             minZoom: 0,  // Minimum zoom level
             maxZoom: 5,  // Maximum zoom level
-            crs: L.CRS.Simple  // Use a simple coordinate reference system for image maps
+            crs: L.CRS.Simple,  // Use a simple coordinate reference system for image maps
+            zoomAnimation: true,  // Enable smooth zoom animation
+            fadeAnimation: true,  // Enable smooth layer fade during zoom
+            markerZoomAnimation: true,  // Enable smooth marker zoom animation
+            dragging: true,  // Enable smooth panning (scrolling)
+            touchZoom: true,  // Enable zooming by touch gesture
+            scrollWheelZoom: true  // Enable zooming by scroll wheel
         });
 
         // Define the image overlay (your housing.jpg image)
