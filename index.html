@@ -94,7 +94,7 @@ const zoomStep = 0.1; // Zoom increment
 // Image URL (local path to your map image)
 const imageUrl = "images/housing.jpg";  // The relative path to your image
 
-// Store points relative to the original image size (before zoom)
+// Store points as original image coordinates (before zoom)
 let points = [];
 
 // Function to load the image from URL
@@ -155,8 +155,8 @@ imageContainer.addEventListener('click', function(event) {
 
     // Save the point in the original image coordinates (before zoom)
     const point = {
-        x: x / scale,  // Store the point based on the original image size
-        y: y / scale   // Store the point based on the original image size
+        x: x / scale,  // Store the point in the original coordinates
+        y: y / scale   // Store the point in the original coordinates
     };
 
     points.push(point);
@@ -174,7 +174,7 @@ function redrawPoints() {
         const pointDiv = document.createElement('div');
         pointDiv.classList.add('point');
 
-        // Adjust position based on current zoom
+        // Adjust position based on current zoom level
         const adjustedX = point.x * scale;
         const adjustedY = point.y * scale;
 
