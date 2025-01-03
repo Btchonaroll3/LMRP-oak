@@ -39,7 +39,7 @@
     <script>
         // Initialize the map with Leaflet
         var map = L.map('map', {
-            center: [750, 1000],  // Start at the center of the image (based on the size you provide)
+            center: [2972, 4037],  // Start at the center of the image (half the size of your image)
             zoom: 2,  // Set the initial zoom level
             minZoom: 1,  // Minimum zoom level
             maxZoom: 5,  // Maximum zoom level
@@ -49,8 +49,8 @@
         // Define the image overlay (your housing.jpg image)
         var imageUrl = 'images/housing.jpg';  // Path to your image (make sure the path is correct)
         
-        // Adjust image bounds (adjust these values based on your image size)
-        var imageBounds = [[0, 0], [1500, 2000]];  // Image size: height x width
+        // Adjust image bounds (5944px x 8075px)
+        var imageBounds = [[0, 0], [5944, 8075]];  // Image size: height x width
 
         // Add the image as an overlay
         L.imageOverlay(imageUrl, imageBounds).addTo(map);
