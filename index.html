@@ -74,6 +74,9 @@
     let offsetY = 0;
     let points = [];
 
+    // Set up the image so it starts centered and zoomed at 150%
+    imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+
     // Enable scrolling to pan the image
     imageContainer.addEventListener('mousedown', (event) => {
         event.preventDefault();
@@ -156,9 +159,6 @@
             labelElement.style.top = `${point.y * scale + offsetY - 10}px`;
         });
     }
-
-    // Initialize the image with the correct zoom level
-    updateImage();
 
 </script>
 
