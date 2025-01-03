@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Image with Zoom, Scroll, Points, and URL</title>
+    <title>Interactive Image with Zoom, Scroll, Points, and Local Image</title>
     <style>
         body {
             margin: 0;
@@ -67,7 +67,7 @@
             cursor: pointer;
         }
 
-        /* Image URL input */
+        /* Image URL input (if needed, but not used in this case) */
         .url-input {
             position: fixed;
             top: 70px;
@@ -86,12 +86,6 @@
 </head>
 <body>
 
-<!-- Input for the image URL -->
-<div class="url-input">
-    <input type="text" id="imageUrl" placeholder="Enter image URL" />
-    <button onclick="loadImage()">Load Image</button>
-</div>
-
 <!-- Zoom controls -->
 <div class="zoom-controls">
     <button class="zoom-button" id="zoomIn">+</button>
@@ -108,14 +102,15 @@
 const imageContainer = document.getElementById('imageContainer');
 const zoomInButton = document.getElementById('zoomIn');
 const zoomOutButton = document.getElementById('zoomOut');
-const imageUrlInput = document.getElementById('imageUrl');
 let currentImage = null; // To store the image element
 let scale = 1; // Initial zoom level
 const zoomStep = 0.1; // Zoom increment
 
-// Function to load the image from URL input
+// Image URL (local path to your map image)
+const imageUrl = "images/housing.jpg";  // The relative path to your image
+
+// Function to load the image from URL (in this case, it's hardcoded)
 function loadImage() {
-    const imageUrl = imageUrlInput.value.trim();
     if (imageUrl) {
         // Clear previous image if any
         if (currentImage) {
@@ -189,6 +184,9 @@ imageContainer.addEventListener('click', function(event) {
         });
     });
 });
+
+// Load the image initially when the page loads
+window.onload = loadImage;
 </script>
 
 </body>
