@@ -4,14 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Map - Housing</title>
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <!-- Your custom styles -->
-    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Inline CSS -->
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #f4f4f4;
+        }
+
+        .map-container {
+            height: 100vh;
+            width: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Custom zoom buttons */
+        .zoom-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .zoom-buttons button {
+            display: block;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .zoom-buttons button:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
     <!-- Map container where the map will appear -->
     <div id="map" class="map-container"></div>
+
+    <!-- Custom zoom buttons -->
+    <div class="zoom-buttons">
+        <button id="zoomInBtn">Zoom In</button>
+        <button id="zoomOutBtn">Zoom Out</button>
+    </div>
 
     <!-- jQuery (Optional, for additional functionality) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -19,7 +63,61 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-    <!-- Your custom JavaScript -->
-    <script src="scripts.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        // Initialize the map with Leaflet
+        var map = L.map('map', {
+            center: [2972, 4037],  // Start at the center of the image (half the size of your image)
+            zoom: 1,  // Set the initial zoom level (will be adjusted by fitBounds)
+            minZoom: 1,  // Minimum zoom level
+            maxZoom: 5,  // Maximum zoom level
+            crs: L.CRS.Simple  // Use a simple coordinate reference system for image maps
+        });
+
+        // Define the image overlay (your housing.jpg image)
+        var imageUrl = 'images/housing.jpg';  // Path to your image (make sure the path is correct)
+        
+        // Adjust image bounds (5944px x 8075px)
+        var imageBounds = [[0, 0], [5944, 8075]];  // Image size: height x width
+
+        // Add the image as an overlay
+        var overlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+
+        // Use fitBounds to ensure the entire image is visible on initial load
+        map.fitBounds(imageBounds);  // Automatically adjusts zoom level to fit the image within the map
+
+        // Allow users to place markers on the map
+        var markersLayer = L.layerGroup().addTo(map);
+
+        map.on('click', function(e) {
+            // Prevent the default scroll behavior when clicking on the map
+            e.preventDefault();
+            var latlng = e.latlng;
+            // Place a marker when the map is clicked
+            var marker = L.circleMarker(latlng, {
+                radius: 10,
+                color: 'red',
+                fillColor: 'red',
+                fillOpacity: 0.8
+            }).addTo(markersLayer);
+
+            // Add a popup with coordinates
+            marker.bindPopup("Marker placed at: " + latlng.lat.toFixed(2) + ", " + latlng.lng.toFixed(2)).openPopup();
+        });
+
+        // Prevent the map from scrolling when zoomed in
+        map.on('wheel', function(e) {
+            e.preventDefault();
+        });
+
+        // Custom zoom button functionality
+        document.getElementById('zoomInBtn').addEventListener('click', function() {
+            map.zoomIn();
+        });
+
+        document.getElementById('zoomOutBtn').addEventListener('click', function() {
+            map.zoomOut();
+        });
+    </script>
 </body>
 </html>
