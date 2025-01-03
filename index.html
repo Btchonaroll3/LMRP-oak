@@ -3,163 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scrollable Map with Points</title>
+    <title>Interactive Map with Points</title>
     <style>
-        body, html {
+        body {
+            display: flex;
+            flex-direction: row;
             margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
-        #container {
-            width: 100%;
-            height: 100%;
+            height: 100vh;
             overflow: hidden;
-            position: relative;
-            background-color: #f0f0f0;
         }
 
-        #image-container {
-            width: 100%;
+        #map-container {
+            position: relative;
+            width: 80%;
             height: 100%;
+            overflow: scroll;
+        }
+
+        #map-image {
             position: absolute;
-            background-image: url('images/housing.jpg');
-            background-size: auto;
-            background-repeat: no-repeat;
-            background-position: center;
-            cursor: pointer;
-            transform-origin: 0 0; /* Ensure the image scales from the top-left corner */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+        }
+
+        #info-panel {
+            width: 20%;
+            height: 100%;
+            background: #f4f4f4;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #info-panel h2 {
+            margin-top: 0;
         }
 
         .point {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 10px;
+            height: 10px;
             background-color: red;
             border-radius: 50%;
             cursor: pointer;
         }
 
-        .label {
-            position: absolute;
-            color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 2px 5px;
-            font-size: 14px;
-            display: none;
+        .point:hover {
+            background-color: orange;
         }
 
-        .popup {
-            position: absolute;
-            background: white;
-            border: 1px solid #ccc;
-            padding: 10px;
-            display: none;
-            z-index: 999;
+        #point-info {
+            margin-top: 20px;
+        }
+
+        #point-info img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
+    <div id="map-container">
+        <img id="map-image" src="images/housing.jpg" alt="Housing Map">
+    </div>
 
-<div id="container">
-    <div id="image-container"></div>
-    <div class="popup" id="popup"></div>
-</div>
+    <div id="info-panel">
+        <h2>Point Information</h2>
+        <div id="point-info">
+            <p>No point selected</p>
+        </div>
+        <div>
+            <h3>Add a New Point</h3>
+            <label for="label">Label:</label>
+            <input type="text" id="label" placeholder="Enter label" />
+            <label for="imageUrl">Image URL:</label>
+            <input type="text" id="imageUrl" placeholder="Enter image URL" />
+            <button id="add-point-btn">Add Point</button>
+        </div>
+    </div>
 
-<script>
-    const imageContainer = document.getElementById('image-container');
-    const popup = document.getElementById('popup');
-    let offsetX = 0;
-    let offsetY = 0;
-    let points = [];
+    <script>
+        let points = [];
+        let selectedPoint = null;
 
-    // Set up the image so it starts centered without zoom
-    imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        const mapContainer = document.getElementById('map-container');
+        const mapImage = document.getElementById('map-image');
+        const infoPanel = document.getElementById('point-info');
+        const addPointBtn = document.getElementById('add-point-btn');
+        const labelInput = document.getElementById('label');
+        const imageUrlInput = document.getElementById('imageUrl');
 
-    // Enable scrolling to pan the image
-    imageContainer.addEventListener('mousedown', (event) => {
-        event.preventDefault();
-        const startX = event.clientX;
-        const startY = event.clientY;
-        const startOffsetX = offsetX;
-        const startOffsetY = offsetY;
+        // Event listener to handle point clicks and selecting points
+        mapContainer.addEventListener('click', (e) => {
+            const mapRect = mapImage.getBoundingClientRect();
+            const x = e.clientX - mapRect.left;
+            const y = e.clientY - mapRect.top;
 
-        function onMouseMove(moveEvent) {
-            offsetX = startOffsetX + moveEvent.clientX - startX;
-            offsetY = startOffsetY + moveEvent.clientY - startY;
-            updateImage();
+            // Add the point to the map at the clicked location
+            const point = {
+                x: x,
+                y: y,
+                label: labelInput.value,
+                imageUrl: imageUrlInput.value
+            };
+            points.push(point);
+
+            // Create a point on the image
+            const pointElement = document.createElement('div');
+            pointElement.classList.add('point');
+            pointElement.style.top = `${y - 5}px`;  // Offset by half width/height
+            pointElement.style.left = `${x - 5}px`;
+            pointElement.addEventListener('click', () => showPointInfo(point));
+            mapContainer.appendChild(pointElement);
+
+            // Clear the input fields after adding
+            labelInput.value = '';
+            imageUrlInput.value = '';
+        });
+
+        // Function to show point information in the info panel
+        function showPointInfo(point) {
+            selectedPoint = point;
+            infoPanel.innerHTML = `
+                <h2>Point Information</h2>
+                <p><strong>Label:</strong> ${point.label}</p>
+                <div>
+                    <strong>Image:</strong><br />
+                    <img src="${point.imageUrl}" alt="${point.label}" />
+                </div>
+            `;
         }
 
-        function onMouseUp() {
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mouseup', onMouseUp);
-        }
-
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-    });
-
-    imageContainer.addEventListener('click', (event) => {
-        const mouseX = (event.clientX - offsetX);
-        const mouseY = (event.clientY - offsetY);
-        const point = { x: mouseX, y: mouseY, label: '', imageUrl: '' };
-
-        // Prompt for label and image URL
-        const label = prompt('Enter label for this point:');
-        if (label) point.label = label;
-        const imageUrl = prompt('Enter image URL (optional):');
-        if (imageUrl) point.imageUrl = imageUrl;
-
-        points.push(point);
-        createPoint(point);
-    });
-
-    function createPoint(point) {
-        const pointElement = document.createElement('div');
-        pointElement.classList.add('point');
-        pointElement.style.left = `${point.x + offsetX - 10}px`;
-        pointElement.style.top = `${point.y + offsetY - 10}px`;
-
-        const labelElement = document.createElement('div');
-        labelElement.classList.add('label');
-        labelElement.innerText = point.label;
-        labelElement.style.left = `${point.x + offsetX + 15}px`;
-        labelElement.style.top = `${point.y + offsetY - 10}px`;
-
-        pointElement.addEventListener('click', () => {
-            if (point.imageUrl) {
-                popup.innerHTML = `<img src="${point.imageUrl}" alt="Image" style="width: 200px; height: 200px;">`;
+        // Add point functionality
+        addPointBtn.addEventListener('click', () => {
+            const label = labelInput.value;
+            const imageUrl = imageUrlInput.value;
+            if (label && imageUrl) {
+                const point = {
+                    x: 100,  // Default position for demo
+                    y: 100,  // Default position for demo
+                    label: label,
+                    imageUrl: imageUrl
+                };
+                points.push(point);
+                const pointElement = document.createElement('div');
+                pointElement.classList.add('point');
+                pointElement.style.top = `${point.y - 5}px`;
+                pointElement.style.left = `${point.x - 5}px`;
+                pointElement.addEventListener('click', () => showPointInfo(point));
+                mapContainer.appendChild(pointElement);
             }
-            popup.innerHTML += `<p>${point.label}</p>`;
-            popup.style.left = `${point.x + offsetX + 20}px`;
-            popup.style.top = `${point.y + offsetY + 20}px`;
-            popup.style.display = 'block';
         });
-
-        imageContainer.appendChild(pointElement);
-        imageContainer.appendChild(labelElement);
-    }
-
-    function updateImage() {
-        imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-        updatePoints();
-    }
-
-    // Update the position of points based on the current position
-    function updatePoints() {
-        const pointElements = document.querySelectorAll('.point');
-        const labelElements = document.querySelectorAll('.label');
-        points.forEach((point, index) => {
-            const pointElement = pointElements[index];
-            const labelElement = labelElements[index];
-            pointElement.style.left = `${point.x + offsetX - 10}px`;
-            pointElement.style.top = `${point.y + offsetY - 10}px`;
-            labelElement.style.left = `${point.x + offsetX + 15}px`;
-            labelElement.style.top = `${point.y + offsetY - 10}px`;
-        });
-    }
-
-</script>
-
+    </script>
 </body>
 </html>
