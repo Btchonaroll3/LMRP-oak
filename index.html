@@ -96,6 +96,7 @@ const imageUrl = "images/housing.jpg";  // The relative path to your image
 
 // Store points as original image coordinates (before zoom)
 let points = [];
+let originalImageWidth, originalImageHeight;
 
 // Function to load the image from URL
 function loadImage() {
@@ -113,12 +114,18 @@ function loadImage() {
         currentImage.style.transition = "transform 0.3s ease";
         currentImage.style.cursor = "pointer";
 
+        // Wait for the image to load and get its original size
+        currentImage.onload = () => {
+            originalImageWidth = currentImage.width;
+            originalImageHeight = currentImage.height;
+
+            // Reset zoom to default (fully zoomed out)
+            scale = 1;
+            setZoom();
+        };
+
         // Append the image to the container
         imageContainer.appendChild(currentImage);
-
-        // Reset zoom to default
-        scale = 1;
-        setZoom();
     } else {
         alert("Please enter a valid image URL.");
     }
