@@ -162,21 +162,25 @@ imageContainer.addEventListener('click', function(event) {
     const x = event.offsetX;
     const y = event.offsetY;
 
+    // Adjust the coordinates based on the current zoom scale
+    const adjustedX = x / scale;
+    const adjustedY = y / scale;
+
     const point = document.createElement('div');
     point.classList.add('point');
-    point.style.left = `${x - 7}px`; // Center the point
-    point.style.top = `${y - 7}px`;
+    point.style.left = `${adjustedX - 7}px`; // Center the point
+    point.style.top = `${adjustedY - 7}px`;
 
-    point.setAttribute('title', `Point at (${x}, ${y})`);
+    point.setAttribute('title', `Point at (${adjustedX}, ${adjustedY})`);
     imageContainer.appendChild(point);
 
     // Show the tooltip on hover
     point.addEventListener('mouseenter', function() {
         const tooltip = document.createElement('div');
         tooltip.classList.add('tooltip');
-        tooltip.style.left = `${x + 10}px`;
-        tooltip.style.top = `${y + 10}px`;
-        tooltip.innerText = `Point at (${x}, ${y})`;
+        tooltip.style.left = `${adjustedX + 10}px`;
+        tooltip.style.top = `${adjustedY + 10}px`;
+        tooltip.innerText = `Point at (${adjustedX.toFixed(2)}, ${adjustedY.toFixed(2)})`;
         imageContainer.appendChild(tooltip);
 
         point.addEventListener('mouseleave', function() {
