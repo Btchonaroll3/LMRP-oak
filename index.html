@@ -28,6 +28,7 @@
             background-repeat: no-repeat;
             background-position: center;
             cursor: pointer;
+            transform-origin: 0 0; /* Ensure the image scales from the top-left corner */
         }
 
         .point {
@@ -68,7 +69,7 @@
 <script>
     const imageContainer = document.getElementById('image-container');
     const popup = document.getElementById('popup');
-    let scale = 1;
+    let scale = 1.5;  // Initial zoom set to 50%
     let offsetX = 0;
     let offsetY = 0;
     let points = [];
@@ -83,6 +84,7 @@
         }
 
         updateImage();
+        updatePoints();
     });
 
     imageContainer.addEventListener('mousedown', (event) => {
@@ -151,6 +153,24 @@
     function updateImage() {
         imageContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
     }
+
+    // Update the position of points based on the current scale
+    function updatePoints() {
+        const pointElements = document.querySelectorAll('.point');
+        const labelElements = document.querySelectorAll('.label');
+        points.forEach((point, index) => {
+            const pointElement = pointElements[index];
+            const labelElement = labelElements[index];
+            pointElement.style.left = `${point.x * scale + offsetX - 10}px`;
+            pointElement.style.top = `${point.y * scale + offsetY - 10}px`;
+            labelElement.style.left = `${point.x * scale + offsetX + 15}px`;
+            labelElement.style.top = `${point.y * scale + offsetY - 10}px`;
+        });
+    }
+
+    // Initialize the image with the correct zoom level
+    updateImage();
+
 </script>
 
 </body>
