@@ -145,7 +145,7 @@
     <!-- Map container where the map will appear -->
     <div id="map" class="map-container"></div>
 
-    <!-- Custom zoom buttons -->
+    <!-- Custom zoom buttons (removed zoom functionality) -->
     <div class="zoom-buttons">
         <button id="zoomInBtn">Zoom In</button>
         <button id="zoomOutBtn">Zoom Out</button>
@@ -195,13 +195,16 @@
             // Show the input form for the marker description
             document.querySelector('.input-section').style.display = 'block';
 
+            // Change the cursor to indicate point placement
+            map.getContainer().style.cursor = 'crosshair';
+
             // Enable map click to place marker
             map.once('click', function(e) {
                 var latlng = e.latlng;
 
-                // Create and add marker to the map
+                // Create and add marker to the map (small red pin circle)
                 var marker = L.circleMarker(latlng, {
-                    radius: 10,
+                    radius: 6,
                     color: 'red',
                     fillColor: 'red',
                     fillOpacity: 0.8
@@ -213,8 +216,11 @@
                 // Assign the clicked marker to be edited
                 currentMarker = marker;
 
-                // Hide the input section until the user fills the details
-                document.querySelector('.input-section').style.display = 'none';
+                // Show the input section
+                document.querySelector('.input-section').style.display = 'block';
+                
+                // Reset cursor to default
+                map.getContainer().style.cursor = '';
             });
         });
 
@@ -231,16 +237,33 @@
                 document.getElementById('markerTitle').value = '';
                 document.getElementById('markerDesc').value = '';
                 currentMarker = null;
+
+                // Hide the input section after saving
+                document.querySelector('.input-section').style.display = 'none';
             }
         });
 
-        // Custom zoom button functionality
-        document.getElementById('zoomInBtn').addEventListener('click', function() {
-            map.zoomIn();
-        });
+        // Handle marker click event to toggle description
+        map.on('click', function(e) {
+            // Check if the clicked position is on a marker
+            for (var i = 0; i < markersData.length; i++) {
+                var markerData = markersData[i];
+                if (markerData.marker.getBounds().contains(e.latlng)) {
+                    var marker = markerData.marker;
+                    var popup = marker.getPopup();
 
-        document.getElementById('zoomOutBtn').addEventListener('click', function() {
-            map.zoomOut();
+                    if (popup._isOpen) {
+                        // If already open, close it
+                        marker.closePopup();
+                        document.getElementById('info').innerHTML = "<p>Select a marker to view its description.</p>";
+                    } else {
+                        // Open the popup and display the description in the left panel
+                        marker.openPopup();
+                        document.getElementById('info').innerHTML = "<h4>" + marker._popup._content.split('<br>')[0] + "</h4><p>" + marker._popup._content.split('<br>')[1] + "</p>";
+                    }
+                    break;
+                }
+            }
         });
     </script>
 </body>
