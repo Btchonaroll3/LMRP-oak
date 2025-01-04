@@ -15,7 +15,7 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Left panel for descriptions */
+        /* Left panel for menu */
         .left-panel {
             position: fixed;
             top: 0;
@@ -71,14 +71,73 @@
         .zoom-buttons button:hover {
             background-color: #f1f1f1;
         }
+
+        /* Button to add point */
+        #addPointButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 18px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #addPointButton:hover {
+            background-color: #45a049;
+        }
+
+        .left-panel .input-section {
+            margin-top: 20px;
+        }
+
+        .left-panel .input-section label {
+            font-size: 14px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .left-panel .input-section input,
+        .left-panel .input-section textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .left-panel .input-section button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .left-panel .input-section button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Left panel for displaying marker information -->
+    <!-- Left panel for menu -->
     <div class="left-panel">
         <h3>Marker Info</h3>
-        <div id="marker-info">
+        <button id="addPointButton">Add Point</button>
+        <div class="input-section" style="display: none;">
+            <h4>Marker Description</h4>
+            <label for="markerTitle">Title:</label>
+            <input type="text" id="markerTitle" placeholder="Enter title">
+            <label for="markerDesc">Description:</label>
+            <textarea id="markerDesc" placeholder="Enter description"></textarea>
+            <button id="saveMarker">Save Marker</button>
+        </div>
+        <div id="info">
             <p>Select a marker to view its description.</p>
         </div>
     </div>
@@ -129,44 +188,50 @@
 
         // Array to store markers
         var markersData = [];
+        var currentMarker = null;
 
-        // Allow users to place markers on the map
-        var markersLayer = L.layerGroup().addTo(map);
+        // Handle "Add Point" button click
+        document.getElementById('addPointButton').addEventListener('click', function() {
+            // Show the input form for the marker description
+            document.querySelector('.input-section').style.display = 'block';
 
-        // Handle map clicks to place markers
-        map.on('click', function(e) {
-            // Get coordinates of the clicked location
-            var latlng = e.latlng;
-            
-            // Create a marker with a unique description
-            var marker = L.circleMarker(latlng, {
-                radius: 10,
-                color: 'red',
-                fillColor: 'red',
-                fillOpacity: 0.8
-            }).addTo(markersLayer);
+            // Enable map click to place marker
+            map.once('click', function(e) {
+                var latlng = e.latlng;
 
-            // Add a description to the marker
-            var markerDescription = "This is a marker placed at: " + latlng.lat.toFixed(2) + ", " + latlng.lng.toFixed(2);
+                // Create and add marker to the map
+                var marker = L.circleMarker(latlng, {
+                    radius: 10,
+                    color: 'red',
+                    fillColor: 'red',
+                    fillOpacity: 0.8
+                }).addTo(map);
 
-            // Store marker data (for displaying later)
-            markersData.push({
-                marker: marker,
-                latlng: latlng,
-                description: markerDescription
+                // Store the marker data in the markersData array
+                markersData.push({ marker: marker, latlng: latlng });
+
+                // Assign the clicked marker to be edited
+                currentMarker = marker;
+
+                // Hide the input section until the user fills the details
+                document.querySelector('.input-section').style.display = 'none';
             });
+        });
 
-            // Add event listener to show description on click
-            marker.on('click', function() {
-                // Find the marker data associated with this marker
-                var markerInfo = markersData.find(function(item) {
-                    return item.marker === marker;
-                });
+        // Handle saving the marker description
+        document.getElementById('saveMarker').addEventListener('click', function() {
+            if (currentMarker) {
+                var title = document.getElementById('markerTitle').value;
+                var description = document.getElementById('markerDesc').value;
 
-                // Display the description on the left panel
-                var infoDiv = document.getElementById('marker-info');
-                infoDiv.innerHTML = "<h3>Marker Details</h3><p>" + markerInfo.description + "</p>";
-            });
+                // Store the description as a property of the marker
+                currentMarker.bindPopup("<strong>" + title + "</strong><br>" + description).openPopup();
+
+                // Clear the form and reset current marker
+                document.getElementById('markerTitle').value = '';
+                document.getElementById('markerDesc').value = '';
+                currentMarker = null;
+            }
         });
 
         // Custom zoom button functionality
