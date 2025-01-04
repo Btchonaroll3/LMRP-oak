@@ -1,71 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Map - Housing</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Image Map with Unique Markers</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+  <style>
+    /* Map container styles */
+    #map {
+      height: 600px; /* Adjust the height of the map */
+    }
 
-    <!-- Inline CSS -->
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background-color: #f4f4f4;
-            font-family: Arial, sans-serif;
-        }
+    /* Controls styles */
+    .controls {
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.7); /* Transparent background */
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
 
-        /* Map container */
-        .map-container {
-            height: 100vh;
-            width: 100%;
-        }
+    .controls input {
+      margin-right: 10px;
+      padding: 5px;
+      font-size: 14px;
+    }
 
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+    .controls button {
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Map container where the map will appear -->
-    <div id="map" class="map-container"></div>
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search locations..." />
+    <button id="zoom-in">Zoom In</button>
+    <button id="zoom-out">Zoom Out</button>
+  </div>
+  
+  <div id="map"></div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+  <script>
+    // Initialize the map with coordinates (top-left corner and bottom-right corner of the image)
+    const map = L.map('map').setView([0, 0], 2); // Centering the map at a basic position
+    const imageUrl = 'images/housing.jpg'; // Path to your source image
+    const imageBounds = [[0, 0], [1000, 1000]]; // Specify the bounds of the image (in pixels)
 
-    <!-- Custom JavaScript -->
-    <script>
-        // Initialize the map with Leaflet
-        var map = L.map('map', {
-            center: [1472, 2000],  // Start at the center of the image (half the size of your image)
-            zoom: 0,  // Start with zoom level 0 to show the full image
-            minZoom: 0,  // Minimum zoom level
-            maxZoom: 5,  // Maximum zoom level
-            crs: L.CRS.Simple,  // Use a simple coordinate reference system for image maps
-            zoomAnimation: true,  // Enable smooth zoom animation
-            fadeAnimation: true,  // Enable smooth layer fade during zoom
-            markerZoomAnimation: true,  // Enable smooth marker zoom animation
-            dragging: true,  // Enable smooth panning (scrolling)
-            touchZoom: true,  // Enable zooming by touch gesture
-            scrollWheelZoom: false  // Disable zooming by scroll wheel
-        });
+    // Set image overlay as the base layer for the map
+    L.imageOverlay(imageUrl, imageBounds).addTo(map);
 
-        // Define the image overlay (your housing.jpg image)
-        var imageUrl = 'images/housing.jpg';  // Path to your image (make sure the path is correct)
-        
-        // Adjust image bounds (2944px x 4000px)
-        var imageBounds = [[0, 0], [2944, 4000]];  // Image size: height x width
+    // Adjust the map zoom and bounds to fit the image size
+    map.fitBounds(imageBounds);
 
-        // Add the image as an overlay
-        var overlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+    // Example markers with unique icons
+    const markers = [
+      { coords: [50, 50], title: 'House 1', description: 'Description of House 1', icon: 'images/house1-icon.png' },
+      { coords: [300, 200], title: 'House 2', description: 'Description of House 2', icon: 'images/house2-icon.png' },
+      { coords: [700, 800], title: 'House 3', description: 'Description of House 3', icon: 'images/house3-icon.png' },
+    ];
 
-        // Use fitBounds to ensure the entire image is visible on initial load
-        map.fitBounds(imageBounds);  // Automatically adjusts zoom level to fit the image within the map
+    // Convert the pixel coordinates to map coordinates
+    function imageToLatLng(x, y) {
+      const lat = (y / 1000) * 180 - 90; // Simple formula to convert based on image height (1000px)
+      const lng = (x / 1000) * 360 - 180; // Simple formula to convert based on image width (1000px)
+      return [lat, lng];
+    }
 
-        // Disable zooming by mouse wheel (this line can be removed if you want to enable zooming)
-        map.scrollWheelZoom.disable();
-    </script>
+    // Add unique markers to the map
+    markers.forEach(marker => {
+      const latLng = imageToLatLng(marker.coords[0], marker.coords[1]);
+
+      // Create a custom icon for each marker
+      const customIcon = L.icon({
+        iconUrl: marker.icon, // Path to the custom icon
+        iconSize: [32, 32], // Size of the icon
+        iconAnchor: [16, 32], // Anchor point (center of the icon)
+        popupAnchor: [0, -32] // Position the popup above the marker
+      });
+
+      // Add marker with the custom icon
+      const leafletMarker = L.marker(latLng, { icon: customIcon }).addTo(map);
+      leafletMarker.bindPopup(`<b>${marker.title}</b><br>${marker.description}`);
+    });
+
+    // Zoom controls
+    document.getElementById("zoom-in").addEventListener("click", () => {
+      map.zoomIn();
+    });
+
+    document.getElementById("zoom-out").addEventListener("click", () => {
+      map.zoomOut();
+    });
+
+    // Search functionality (basic example)
+    document.getElementById("search").addEventListener("input", (event) => {
+      const query = event.target.value.toLowerCase();
+      markers.forEach(marker => {
+        const isMatch = marker.title.toLowerCase().includes(query);
+        const latLng = imageToLatLng(marker.coords[0], marker.coords[1]);
+        if (isMatch) {
+          L.marker(latLng).addTo(map).bindPopup(`<b>${marker.title}</b><br>${marker.description}`).openPopup();
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>
