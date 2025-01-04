@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Map - Housing</title>
-    
+
     <!-- Inline CSS -->
     <style>
         body, html {
@@ -12,11 +12,37 @@
             padding: 0;
             height: 100%;
             background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
         }
 
+        /* Left panel for descriptions */
+        .left-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .left-panel h3 {
+            margin-top: 0;
+        }
+
+        .left-panel .description {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Map container */
         .map-container {
+            margin-left: 250px; /* Make room for the left panel */
             height: 100vh;
-            width: 100%;
+            width: calc(100% - 250px); /* Adjust the width of the map */
         }
 
         #map {
@@ -48,6 +74,15 @@
     </style>
 </head>
 <body>
+
+    <!-- Left panel for displaying marker information -->
+    <div class="left-panel">
+        <h3>Marker Info</h3>
+        <div id="marker-info">
+            <p>Select a marker to view its description.</p>
+        </div>
+    </div>
+
     <!-- Map container where the map will appear -->
     <div id="map" class="map-container"></div>
 
@@ -77,7 +112,7 @@
             markerZoomAnimation: true,  // Enable smooth marker zoom animation
             dragging: true,  // Enable smooth panning (scrolling)
             touchZoom: true,  // Enable zooming by touch gesture
-            scrollWheelZoom: true  // Enable zooming by scroll wheel
+            scrollWheelZoom: false  // Disable zooming by scroll wheel
         });
 
         // Define the image overlay (your housing.jpg image)
@@ -92,14 +127,18 @@
         // Use fitBounds to ensure the entire image is visible on initial load
         map.fitBounds(imageBounds);  // Automatically adjusts zoom level to fit the image within the map
 
+        // Array to store markers
+        var markersData = [];
+
         // Allow users to place markers on the map
         var markersLayer = L.layerGroup().addTo(map);
 
+        // Handle map clicks to place markers
         map.on('click', function(e) {
-            // Prevent the default scroll behavior when clicking on the map
-            e.preventDefault();
+            // Get coordinates of the clicked location
             var latlng = e.latlng;
-            // Place a marker when the map is clicked
+            
+            // Create a marker with a unique description
             var marker = L.circleMarker(latlng, {
                 radius: 10,
                 color: 'red',
@@ -107,13 +146,27 @@
                 fillOpacity: 0.8
             }).addTo(markersLayer);
 
-            // Add a popup with coordinates
-            marker.bindPopup("Marker placed at: " + latlng.lat.toFixed(2) + ", " + latlng.lng.toFixed(2)).openPopup();
-        });
+            // Add a description to the marker
+            var markerDescription = "This is a marker placed at: " + latlng.lat.toFixed(2) + ", " + latlng.lng.toFixed(2);
 
-        // Prevent the map from scrolling when zoomed in
-        map.on('wheel', function(e) {
-            e.preventDefault();
+            // Store marker data (for displaying later)
+            markersData.push({
+                marker: marker,
+                latlng: latlng,
+                description: markerDescription
+            });
+
+            // Add event listener to show description on click
+            marker.on('click', function() {
+                // Find the marker data associated with this marker
+                var markerInfo = markersData.find(function(item) {
+                    return item.marker === marker;
+                });
+
+                // Display the description on the left panel
+                var infoDiv = document.getElementById('marker-info');
+                infoDiv.innerHTML = "<h3>Marker Details</h3><p>" + markerInfo.description + "</p>";
+            });
         });
 
         // Custom zoom button functionality
