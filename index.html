@@ -15,116 +15,22 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Left panel for menu */
-        .left-panel {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            height: 100%;
-            background-color: #fff;
-            padding: 20px;
-            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-            z-index: 1000;
-        }
-
-        .left-panel h3 {
-            margin-top: 0;
-        }
-
-        .left-panel .description {
-            font-size: 14px;
-            color: #555;
-        }
-
         /* Map container */
         .map-container {
-            margin-left: 250px; /* Make room for the left panel */
             height: 100vh;
-            width: calc(100% - 250px); /* Adjust the width of the map */
+            width: 100%;
         }
 
         #map {
             width: 100%;
             height: 100%;
         }
-
-        /* Button to add point */
-        #addPointButton {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 18px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #addPointButton:hover {
-            background-color: #45a049;
-        }
-
-        .left-panel .input-section {
-            margin-top: 20px;
-        }
-
-        .left-panel .input-section label {
-            font-size: 14px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .left-panel .input-section input,
-        .left-panel .input-section textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        .left-panel .input-section button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .left-panel .input-section button:hover {
-            background-color: #0056b3;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Left panel for menu -->
-    <div class="left-panel">
-        <h3>Marker Info</h3>
-        <button id="addPointButton">Add Point</button>
-        <div class="input-section" style="display: none;">
-            <h4>Marker Description</h4>
-            <label for="markerTitle">Title:</label>
-            <input type="text" id="markerTitle" placeholder="Enter title">
-            <label for="markerDesc">Description:</label>
-            <textarea id="markerDesc" placeholder="Enter description"></textarea>
-            <button id="saveMarker">Save Marker</button>
-        </div>
-        <div id="info">
-            <p>Select a marker to view its description.</p>
-        </div>
-    </div>
-
     <!-- Map container where the map will appear -->
     <div id="map" class="map-container"></div>
-
-    <!-- jQuery (Optional, for additional functionality) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -158,83 +64,8 @@
         // Use fitBounds to ensure the entire image is visible on initial load
         map.fitBounds(imageBounds);  // Automatically adjusts zoom level to fit the image within the map
 
-        // Array to store markers
-        var markersData = [];
-        var currentMarker = null;
-
-        // Handle "Add Point" button click
-        document.getElementById('addPointButton').addEventListener('click', function() {
-            // Show the input form for the marker description
-            document.querySelector('.input-section').style.display = 'block';
-
-            // Change the cursor to indicate point placement
-            map.getContainer().style.cursor = 'crosshair';
-
-            // Enable map click to place marker
-            map.once('click', function(e) {
-                var latlng = e.latlng;
-
-                // Create and add a red circle marker to the map
-                var marker = L.circleMarker(latlng, {
-                    radius: 8, // Size of the circle marker
-                    color: 'red', // Red border color
-                    fillColor: 'red', // Fill color of the circle
-                    fillOpacity: 0.7, // Fill opacity
-                    weight: 2 // Border thickness
-                }).addTo(map);
-
-                // Store the marker data in the markersData array
-                markersData.push({ marker: marker, latlng: latlng });
-
-                // Assign the clicked marker to be edited
-                currentMarker = marker;
-
-                // Reset cursor to default
-                map.getContainer().style.cursor = '';
-            });
-        });
-
-        // Handle saving the marker description
-        document.getElementById('saveMarker').addEventListener('click', function() {
-            if (currentMarker) {
-                var title = document.getElementById('markerTitle').value;
-                var description = document.getElementById('markerDesc').value;
-
-                // Store the description as a property of the marker
-                currentMarker.bindPopup("<strong>" + title + "</strong><br>" + description).openPopup();
-
-                // Clear the form and reset current marker
-                document.getElementById('markerTitle').value = '';
-                document.getElementById('markerDesc').value = '';
-                currentMarker = null;
-
-                // Hide the input section after saving
-                document.querySelector('.input-section').style.display = 'none';
-            }
-        });
-
-        // Handle marker click event to toggle description
-        map.on('click', function(e) {
-            // Check if the clicked position is on a marker
-            for (var i = 0; i < markersData.length; i++) {
-                var markerData = markersData[i];
-                if (markerData.marker.getBounds().contains(e.latlng)) {
-                    var marker = markerData.marker;
-                    var popup = marker.getPopup();
-
-                    if (popup._isOpen) {
-                        // If already open, close it
-                        marker.closePopup();
-                        document.getElementById('info').innerHTML = "<p>Select a marker to view its description.</p>";
-                    } else {
-                        // Open the popup and display the description in the left panel
-                        marker.openPopup();
-                        document.getElementById('info').innerHTML = "<h4>" + marker._popup._content.split('<br>')[0] + "</h4><p>" + marker._popup._content.split('<br>')[1] + "</p>";
-                    }
-                    break;
-                }
-            }
-        });
+        // Disable zooming by mouse wheel (this line can be removed if you want to enable zooming)
+        map.scrollWheelZoom.disable();
     </script>
 </body>
 </html>
