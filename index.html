@@ -99,28 +99,6 @@
         .left-panel .input-section button:hover {
             background-color: #0056b3;
         }
-
-        /* Custom zoom buttons positioned at the bottom right */
-        .zoom-buttons {
-            position: absolute;
-            bottom: 20px; /* Position at the bottom */
-            right: 20px;  /* Position at the right */
-            z-index: 1000;
-        }
-
-        .zoom-buttons button {
-            display: block;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 5px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .zoom-buttons button:hover {
-            background-color: #f1f1f1;
-        }
     </style>
 </head>
 <body>
@@ -144,12 +122,6 @@
 
     <!-- Map container where the map will appear -->
     <div id="map" class="map-container"></div>
-
-    <!-- Custom zoom buttons (removed zoom functionality) -->
-    <div class="zoom-buttons">
-        <button id="zoomInBtn">Zoom In</button>
-        <button id="zoomOutBtn">Zoom Out</button>
-    </div>
 
     <!-- jQuery (Optional, for additional functionality) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -216,9 +188,6 @@
                 // Assign the clicked marker to be edited
                 currentMarker = marker;
 
-                // Show the input section
-                document.querySelector('.input-section').style.display = 'block';
-                
                 // Reset cursor to default
                 map.getContainer().style.cursor = '';
             });
