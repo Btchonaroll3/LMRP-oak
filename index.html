@@ -174,12 +174,13 @@
             map.once('click', function(e) {
                 var latlng = e.latlng;
 
-                // Create and add marker to the map (small red pin circle)
+                // Create and add a red circle marker to the map
                 var marker = L.circleMarker(latlng, {
-                    radius: 6,
-                    color: 'red',
-                    fillColor: 'red',
-                    fillOpacity: 0.8
+                    radius: 8, // Size of the circle marker
+                    color: 'red', // Red border color
+                    fillColor: 'red', // Fill color of the circle
+                    fillOpacity: 0.7, // Fill opacity
+                    weight: 2 // Border thickness
                 }).addTo(map);
 
                 // Store the marker data in the markersData array
